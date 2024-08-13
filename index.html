@@ -10,9 +10,9 @@
 <body>
     <script src="./xmls.js"></script>
     <input type="file" id="upload" multiple />
-    <button id="convert">Convertir a excel</button>
+    <button id="convert">Convertir a JSON</button>
     <pre id="output"></pre>
-
+    <a id="downloadAnchorElem">descargar json</a>
     <script>
         const excluded = [];
 
@@ -94,24 +94,33 @@
 
             // const json =
             // const json2 = xmlToJson(xmlData);
+            const aasdf = xmlToJson(xmlData);
 
-            const json = xmlToJson(xmlData).map((j) => {
-                const clearJSon = {};
-                const flattenedJson = flattenJson(j);
-                Object.keys(flattenedJson).forEach((element) => {
-                    if (!excluded.some((key) => element.includes(key))) {
-                        clearJSon[element] = flattenedJson[element];
-                    }
-                });
-                // const uniqueFlattenedJson = handleDuplicates(flattenedJson);
-                return clearJSon;
-            });
-            document.getElementById("output").textContent = JSON.stringify(
-                json,
-                null,
-                2
-            );
-            jsonToExcel(json);
+            var dataStr =
+                "data:text/json;charset=utf-8," +
+                encodeURIComponent(JSON.stringify(aasdf));
+            var dlAnchorElem = document.getElementById("downloadAnchorElem");
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "scene.json");
+            dlAnchorElem.click();
+
+            // const json = xmlToJson(xmlData).map((j) => {
+            //     const clearJSon = {};
+            //     const flattenedJson = flattenJson(j);
+            //     Object.keys(flattenedJson).forEach((element) => {
+            //         if (!excluded.some((key) => element.includes(key))) {
+            //             clearJSon[element] = flattenedJson[element];
+            //         }
+            //     });
+            //     // const uniqueFlattenedJson = handleDuplicates(flattenedJson);
+            //     return clearJSon;
+            // });
+            // document.getElementById("output").textContent = JSON.stringify(
+            //     json,
+            //     null,
+            //     2
+            // );
+            // jsonToExcel(json);
         }
 
         function flattenJson(json) {
