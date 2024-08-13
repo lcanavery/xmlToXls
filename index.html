@@ -2,43 +2,44 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>XML to JSON</title>
-
 </head>
 
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="./xmls.js"></script>
     <input type="file" id="upload" multiple />
     <button id="convert">Convertir a excel</button>
     <pre id="output"></pre>
 
     <script>
-        const excluded=["version","empleado.direccion.",".periodos.periodo",".ingresosAportes.ingAp"]
+        const excluded = [];
 
-
-
-        document.getElementById('upload').addEventListener('change', handleFileSelect);
-        document.getElementById('convert').addEventListener('click', convertToJson);
+        document
+            .getElementById("upload")
+            .addEventListener("change", handleFileSelect);
+        document
+            .getElementById("convert")
+            .addEventListener("click", convertToJson);
 
         let xmlData = [];
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
-            const files = Array.from(event.target.files)
+            const files = Array.from(event.target.files);
             if (!file) return;
-            files.forEach(async element => {
+            files.forEach(async(element) => {
                 const reader = new FileReader();
-                reader.onload = function (event) {
+                reader.onload = function(event) {
                     xmlData.push(event.target.result);
                 };
                 await reader.readAsText(element);
             });
         }
         const parser = new DOMParser();
+
         function xmlToJson(xml) {
-       
             // Crear un objeto JSON a partir del XML
             function xmlNodeToJson(node) {
                 let obj = {};
@@ -55,7 +56,6 @@
 
                 if (node.hasChildNodes()) {
                     for (let i = 0; i < node.childNodes.length; i++) {
-
                         const childNode = node.childNodes[i];
                         const nodeName = childNode.nodeName;
 
@@ -79,38 +79,40 @@
                 return obj;
             }
 
-           
-            const result = xml.map(element => {
+            const result = xml.map((element) => {
                 const xmlDoc = parser.parseFromString(element, "text/xml");
                 return xmlNodeToJson(xmlDoc.documentElement);
             });
-            return result
+            return result;
         }
 
         function convertToJson() {
             if (!xmlData) {
-                alert('Please upload an XML file first.');
+                alert("Please upload an XML file first.");
                 return;
             }
 
-            // const json = 
+            // const json =
             // const json2 = xmlToJson(xmlData);
 
-            const json = xmlToJson(xmlData).map(j => {
-                const clearJSon={}
+            const json = xmlToJson(xmlData).map((j) => {
+                const clearJSon = {};
                 const flattenedJson = flattenJson(j);
-                Object.keys(flattenedJson).forEach(element => {
-                        if(!excluded.some(key=> element.includes(key))){
-                            clearJSon[element]=flattenedJson[element]
-                        }
+                Object.keys(flattenedJson).forEach((element) => {
+                    if (!excluded.some((key) => element.includes(key))) {
+                        clearJSon[element] = flattenedJson[element];
+                    }
                 });
                 // const uniqueFlattenedJson = handleDuplicates(flattenedJson);
-                return clearJSon
-            })
-            document.getElementById('output').textContent = JSON.stringify(json, null, 2);
-            jsonToExcel(json)
+                return clearJSon;
+            });
+            document.getElementById("output").textContent = JSON.stringify(
+                json,
+                null,
+                2
+            );
+            jsonToExcel(json);
         }
-
 
         function flattenJson(json) {
             const result = {};
@@ -138,7 +140,7 @@
                 }
             }
 
-            recurse(json, '');
+            recurse(json, "");
             return result;
         }
 
@@ -148,30 +150,33 @@
 
             for (const key in obj) {
                 if (obj.hasOwnProperty(key)) {
-                    const baseKey = key.split('.').pop();
+                    const baseKey = key.split(".").pop();
                     if (!counts[baseKey]) {
                         counts[baseKey] = 0;
                     }
                     counts[baseKey]++;
-                    const newKey = counts[baseKey] > 1 ? `${baseKey}_${counts[baseKey] - 1}` : baseKey;
+                    const newKey =
+                        counts[baseKey] > 1 ?
+                        `${baseKey}_${counts[baseKey] - 1}` :
+                        baseKey;
                     result[`${key.replace(baseKey, newKey)}`] = obj[key];
                 }
             }
 
             return result;
         }
-        function jsonToExcel(jsonData, fileName = 'output.xlsx') {
+
+        function jsonToExcel(jsonData, fileName = "output.xlsx") {
             // Crear una hoja de cálculo a partir del JSON
             const worksheet = XLSX.utils.json_to_sheet(jsonData);
 
             // Crear un nuevo libro de trabajo y agregar la hoja de cálculo
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
             // Descargar el archivo de Excel
             XLSX.writeFile(workbook, fileName);
         }
-
     </script>
 </body>
 
